@@ -47,6 +47,7 @@ function sanitize_theme_settings($input)
         'disable_comments',
         'disable_gutenberg',
         'disable_gutenberg_css',
+        'disable_separate_block_assets',
         'disable_dashicons_frontend',
         'disable_jquery',
         'disable_jquery_migrate',
@@ -105,6 +106,7 @@ function render_theme_settings_page()
         'disable_comments' => 'Отключить систему комментариев',
         'disable_gutenberg' => 'Отключить Gutenberg редактор',
         'disable_gutenberg_css' => 'Отключить Gutenberg CSS',
+        'disable_separate_block_assets' => 'Отключить раздельную загрузку CSS блоков Gutenberg',
         'disable_dashicons_frontend' => 'Отключить Dashicons на frontend',
         'disable_jquery' => 'Отключить jQuery (осторожно: может сломать плагины)',
         'disable_jquery_migrate' => 'Отключить jQuery Migrate',
@@ -239,7 +241,7 @@ function cleanup_dequeue_jquery()
     if (!is_admin() && !is_customize_preview()) {
         global $wp_scripts;
         $jquery_dependents = array();
-        
+
         if (isset($wp_scripts->registered)) {
             foreach ($wp_scripts->registered as $handle => $script) {
                 if (isset($script->deps) && in_array('jquery', $script->deps)) {
@@ -247,7 +249,7 @@ function cleanup_dequeue_jquery()
                 }
             }
         }
-        
+
         if (empty($jquery_dependents)) {
             wp_deregister_script('jquery');
         }
@@ -396,6 +398,10 @@ function apply_cleanup_functions()
 
     if (!empty($options['disable_gutenberg_css'])) {
         add_action('wp_enqueue_scripts', 'cleanup_dequeue_gutenberg_css', 100);
+    }
+
+    if (!empty($options['disable_separate_block_assets'])) {
+        add_filter('should_load_separate_core_block_assets', '__return_false');
     }
 
     if (!empty($options['disable_dashicons_frontend'])) {
